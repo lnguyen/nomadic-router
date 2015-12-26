@@ -47,6 +47,7 @@ func (c *Client) NewService(name string, svc Service) error {
 		return err
 	}
 	res, err := c.httpclient.Do(req)
+	defer res.Body.Close()
 	if res.StatusCode != 200 {
 		return err
 	}
@@ -65,6 +66,7 @@ func (c *Client) NewBackend(name string, serviceName string, backend Backend) er
 		return err
 	}
 	res, err := c.httpclient.Do(req)
+	defer res.Body.Close()
 	if res.StatusCode != 200 {
 		return err
 	}
@@ -79,6 +81,7 @@ func (c *Client) GetService(name string) error {
 		return err
 	}
 	res, err := c.httpclient.Do(req)
+	defer res.Body.Close()
 	if res.StatusCode != 200 {
 		return err
 	}
@@ -93,6 +96,7 @@ func (c *Client) GetBackend(name string, svcName string) error {
 		return err
 	}
 	res, err := c.httpclient.Do(req)
+	defer res.Body.Close()
 	if res.StatusCode != 200 {
 		return err
 	}
