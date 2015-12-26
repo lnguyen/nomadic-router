@@ -27,6 +27,12 @@ type ServiceInfo struct {
 	Port    int
 }
 
+// PortMapping struct
+type PortMapping struct {
+	Name string `json:"name"`
+	Port int    `json:"port"`
+}
+
 // NewClient Create new consul client
 func NewClient(endpoint string) *Client {
 	consulConfig := api.DefaultConfig()
@@ -63,15 +69,16 @@ func (c *Client) GetServices() ([]*ServiceInfo, error) {
 	return serviceInfos, nil
 }
 
-func (c *Client) ClaimPort(port int) error {
-	ports, _, err := c.consulClient.KV().Get("/nomadic/ports", &api.QueryOptions{})
+func (c *Client) ClaimPort(name string, port int) error {
+	ports, _, err := c.consulClient.KV().Get("nomadic/ports", &api.QueryOptions{})
 	// Key doesn't exist return empty
 	if ports == nil {
 		return err
 	}
-	var nomadicPorts []int
+	var nomadicPorts []PortMapping
 	json.Unmarshal(ports.Value, &nomadicPorts)
-	nomadicPorts = append(nomadicPorts, port)
+	serviceMapping := PortMapping{Name: name, Port: port}
+	nomadicPorts = append(nomadicPorts, serviceMapping)
 	newPorts, err := json.Marshal(nomadicPorts)
 	if err != nil {
 		return err
@@ -83,15 +90,18 @@ func (c *Client) ClaimPort(port int) error {
 }
 
 // GetPorts from consul
-func (c *Client) GetPorts() []int {
-	ports, _, err := c.consulClient.KV().Get("/nomadic/ports", &api.QueryOptions{})
+func (c *Client) GetPorts() []PortMapping {
+	ports, _, err := c.consulClient.KV().Get("nomadic/ports", &api.QueryOptions{})
 	// Key doesn't exist return empty
 	if ports == nil {
-		kvp := &api.KVPair{Key: "/nomadic/ports", Value: []byte("[]")}
-		c.consulClient.KV().Put(kvp, &api.WriteOptions{})
-		return []int{}
+		kvp := &api.KVPair{Key: "nomadic/ports", Value: []byte("[]")}
+		_, err := c.consulClient.KV().Put(kvp, &api.WriteOptions{})
+		if err != nil {
+			fmt.Println(err)
+		}
+		return []PortMapping{}
 	}
-	var nomadicPorts []int
+	var nomadicPorts []PortMapping
 	err = json.Unmarshal(ports.Value, &nomadicPorts)
 	if err != nil {
 		fmt.Println(err)
@@ -110,16 +120,27 @@ func (c *Client) GeneratePort() int {
 	return randomNumber
 }
 
+func (c *Client) GeneratePortOrGetCurrent(name string) int {
+	ports := c.GetPorts()
+	for _, mapping := range ports {
+		if mapping.Name == name {
+			return mapping.Port
+		}
+	}
+	return c.GeneratePort()
+}
+
 func random(min, max int) int {
 	rand.Seed(time.Now().Unix())
 	return rand.Intn(max-min) + min
 }
 
-func contains(s []int, e int) bool {
+func contains(s []PortMapping, e int) bool {
 	for _, a := range s {
-		if a == e {
+		if a.Port == e {
 			return true
 		}
 	}
 	return false
 }
+

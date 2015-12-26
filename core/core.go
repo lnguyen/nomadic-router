@@ -16,7 +16,7 @@ func PopulateIVS(gorbEndpoint, consulEndpoint, IP string) error {
 	for _, service := range services {
 		err := gorbClient.GetService(service.Name)
 		if err != nil {
-			port := consulClient.GeneratePort()
+			port := consulClient.GeneratePortOrGetCurrent(service.Name)
 			svc := gorb.Service{
 				Host:       IP,
 				Port:       uint16(port),
@@ -28,7 +28,7 @@ func PopulateIVS(gorbEndpoint, consulEndpoint, IP string) error {
 			if err != nil {
 				return err
 			}
-			err = consulClient.ClaimPort(port)
+			err = consulClient.ClaimPort(service.Name, port)
 			if err != nil {
 				return err
 			}
@@ -50,3 +50,4 @@ func PopulateIVS(gorbEndpoint, consulEndpoint, IP string) error {
 
 	return nil
 }
+
