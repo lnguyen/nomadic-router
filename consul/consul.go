@@ -120,14 +120,14 @@ func (c *Client) GeneratePort() int {
 	return randomNumber
 }
 
-func (c *Client) GeneratePortOrGetCurrent(name string) int {
+func (c *Client) GeneratePortOrGetCurrent(name string) (int, bool) {
 	ports := c.GetPorts()
 	for _, mapping := range ports {
 		if mapping.Name == name {
-			return mapping.Port
+			return mapping.Port, false
 		}
 	}
-	return c.GeneratePort()
+	return c.GeneratePort(), true
 }
 
 func random(min, max int) int {
