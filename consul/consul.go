@@ -46,10 +46,8 @@ func (c *Client) GetServices() ([]*ServiceInfo, error) {
 	if err != nil {
 		return []*ServiceInfo{}, err
 	}
-	log.Debug("getting services ", "services", services, "error", err)
 	for service, tags := range services {
 		for _, tag := range tags {
-			log.Debug("service range", "service", service, "tag", tag)
 			consulService, _, _ := c.consulClient.Catalog().Service(service, tag, &api.QueryOptions{})
 			for _, consulService := range consulService {
 				serviceInfo := &ServiceInfo{
@@ -59,7 +57,6 @@ func (c *Client) GetServices() ([]*ServiceInfo, error) {
 					Port:    consulService.ServicePort,
 				}
 				serviceInfos = append(serviceInfos, serviceInfo)
-				log.Debug("Service info", "consulService", consulService)
 			}
 		}
 	}
@@ -126,4 +123,3 @@ func contains(s []int, e int) bool {
 	}
 	return false
 }
-
