@@ -2,6 +2,7 @@ package gorb
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strings"
 )
@@ -83,7 +84,7 @@ func (c *Client) GetService(name string) error {
 	res, err := c.httpclient.Do(req)
 	defer res.Body.Close()
 	if res.StatusCode != 200 {
-		return err
+		return errors.New("Unable to find service")
 	}
 	return nil
 }
@@ -98,7 +99,7 @@ func (c *Client) GetBackend(name string, svcName string) error {
 	res, err := c.httpclient.Do(req)
 	defer res.Body.Close()
 	if res.StatusCode != 200 {
-		return err
+		return errors.New("Unable to find backend")
 	}
 	return nil
 }
