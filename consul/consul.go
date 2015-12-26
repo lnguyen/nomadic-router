@@ -2,6 +2,7 @@ package consul
 
 import (
 	"encoding/json"
+	"fmt"
 	"math/rand"
 	"time"
 
@@ -68,7 +69,7 @@ func (c *Client) GetServices() ([]*ServiceInfo, error) {
 func (c *Client) ClaimPort(port int) error {
 	ports, _, err := c.consulClient.KV().Get("/nomadic/ports", &api.QueryOptions{})
 	// Key doesn't exist return empty
-	if err != nil {
+	if ports == nil {
 		return err
 	}
 	var nomadicPorts []int
@@ -88,11 +89,16 @@ func (c *Client) ClaimPort(port int) error {
 func (c *Client) GetPorts() []int {
 	ports, _, err := c.consulClient.KV().Get("/nomadic/ports", &api.QueryOptions{})
 	// Key doesn't exist return empty
-	if err != nil {
+	if ports == nil {
+		kvp := &api.KVPair{Key: "/nomadic/ports", Value: []byte("[]")}
+		c.consulClient.KV().Put(kvp, &api.WriteOptions{})
 		return []int{}
 	}
 	var nomadicPorts []int
-	json.Unmarshal(ports.Value, &nomadicPorts)
+	err = json.Unmarshal(ports.Value, &nomadicPorts)
+	if err != nil {
+		fmt.Println(err)
+	}
 	return nomadicPorts
 }
 
@@ -120,3 +126,4 @@ func contains(s []int, e int) bool {
 	}
 	return false
 }
+
