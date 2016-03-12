@@ -30,11 +30,23 @@ type Destination struct {
 	Mode   string `valid:"required"`
 }
 
-func (svc Service) GetId() string {
+// Path of service
+func (svc Service) Path() string {
+	return fmt.Sprintf("/services/%s", svc.GetID())
+}
+
+// GetID return id of service
+func (svc Service) GetID() string {
 	return fmt.Sprintf("%v-%v-%v", svc.Host, svc.Port, svc.Protocol)
 }
 
-func (dst Destination) GetId() string {
+// Path of destination
+func (dst Destination) Path() string {
+	return fmt.Sprintf("/destinations/%s", dst.GetID())
+}
+
+// GetID return id of destination
+func (dst Destination) GetID() string {
 	return fmt.Sprintf("%v-%v", dst.Host, dst.Port)
 }
 

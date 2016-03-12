@@ -74,7 +74,7 @@ Vagrant.configure(2) do |config|
     mkdir /home/vagrant/gocode
     echo export GOPATH=/home/vagrant/gocode >> /home/vagrant/.profile
     mkdir -p /home/vagrant/gocode/src/github.com/longnguyen11288/nomadic-router
-    cp -r /vagrant/. /home/vagrant/gocode/src/github.com/longnguyen11288/nomadic-router
+    ln -s /vagrant/ /home/vagrant/gocode/src/github.com/longnguyen11288/nomadic-router
     sudo apt-get install -y libnl-3-dev libnl-genl-3-dev build-essential
     sudo curl -fsSL https://get.docker.com/ | sh
     sudo usermod -aG docker vagrant
